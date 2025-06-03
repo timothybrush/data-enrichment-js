@@ -21,12 +21,12 @@
     "test:all": "yarn test && yarn test:int && yarn lint:langgraph"
   },
   "dependencies": {
-    "@langchain/anthropic": "^0.3.12",
-    "@langchain/community": "^0.3.27",
-    "@langchain/core": "^0.3.37",
-    "@langchain/langgraph": "^0.2.43",
-    "langchain": "^0.3.14",
-    "langsmith": "^0.3.3",
+    "@langchain/anthropic": "^0.3.21",
+    "@langchain/community": "^0.3.45",
+    "@langchain/core": "^0.3.57",
+    "@langchain/langgraph": "^0.3.0",
+    "langchain": "^0.3.27",
+    "langsmith": "^0.3.30",
     "ts-node": "^10.9.2",
     "zod": "^3.23.8"
   },
