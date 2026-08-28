@@ -13,7 +13,6 @@ import {
 import { RunnableConfig } from "@langchain/core/runnables";
 import { tool } from "@langchain/core/tools";
 import { StateGraph } from "@langchain/langgraph";
-import { z } from "zod";
 
 import {
   ConfigurationAnnotation,
@@ -112,24 +111,29 @@ async function callAgentModel(
 /**
  * Validate whether the current extracted info is satisfactory and complete.
  */
-const InfoIsSatisfactory = z.object({
-  reason: z
-    .array(z.string())
-    .describe(
-      "First, provide reasoning for why this is either good or bad as a final result. Must include at least 3 reasons.",
-    ),
-  is_satisfactory: z
-    .boolean()
-    .describe(
-      "After providing your reasoning, provide a value indicating whether the result is satisfactory. If not, you will continue researching.",
-    ),
-  improvement_instructions: z
-    .string()
-    .optional()
-    .describe(
-      "If the result is not satisfactory, provide clear and specific instructions on what needs to be improved or added to make the information satisfactory. This should include details on missing information, areas that need more depth, or specific aspects to focus on in further research.",
-    ),
-});
+const InfoIsSatisfactory = {
+  type: "object",
+  properties: {
+    reason: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "First, provide reasoning for why this is either good or bad as a final result. Must include at least 3 reasons.",
+    },
+    is_satisfactory: {
+      type: "boolean",
+      description:
+        "After providing your reasoning, provide a value indicating whether the result is satisfactory. If not, you will continue researching.",
+    },
+    improvement_instructions: {
+      type: "string",
+      description:
+        "If the result is not satisfactory, provide clear and specific instructions on what needs to be improved or added to make the information satisfactory. This should include details on missing information, areas that need more depth, or specific aspects to focus on in further research.",
+    },
+  },
+  required: ["reason", "is_satisfactory"],
+  additionalProperties: false,
+} as const;
 
 /**
  * Validates the quality of the data enrichment agent's output.
@@ -164,7 +168,11 @@ async function reflect(
 
   // Load the configured model & provide the reflection/critique schema
   const rawModel = await loadChatModel(configuration.model);
-  const boundModel = rawModel.withStructuredOutput(InfoIsSatisfactory);
+  const boundModel = rawModel.withStructuredOutput<{
+    reason: string[];
+    is_satisfactory: boolean;
+    improvement_instructions?: string;
+  }>(InfoIsSatisfactory);
   // Template in the conversation history:
   const p = configuration.prompt
     .replace("{info}", JSON.stringify(state.extractionSchema, null, 2))
