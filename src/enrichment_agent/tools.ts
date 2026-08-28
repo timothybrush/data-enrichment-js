@@ -7,7 +7,7 @@
  */
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { RunnableConfig } from "@langchain/core/runnables";
-import { tool } from "@langchain/core/tools";
+import { StructuredToolInterface, tool } from "@langchain/core/tools";
 
 import { INFO_PROMPT } from "./prompts.js";
 import { ensureConfiguration } from "./configuration.js";
@@ -67,7 +67,7 @@ function initializeTools(
     }),
   });
 
-  return [searchTool, scraperTool];
+  return [searchTool, scraperTool] as StructuredToolInterface[];
 }
 
 export const toolNode = async (
