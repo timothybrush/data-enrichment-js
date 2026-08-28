@@ -7,7 +7,7 @@
  */
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { RunnableConfig } from "@langchain/core/runnables";
-import { tool } from "@langchain/core/tools";
+import { tool, type StructuredToolInterface } from "@langchain/core/tools";
 
 import { INFO_PROMPT } from "./prompts.js";
 import { ensureConfiguration } from "./configuration.js";
@@ -27,7 +27,7 @@ import { z } from "zod";
 function initializeTools(
   state?: typeof StateAnnotation.State,
   config?: RunnableConfig,
-) {
+): StructuredToolInterface[] {
   /**
    * Search for general results.
    *
