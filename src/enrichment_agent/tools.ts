@@ -7,7 +7,7 @@
  */
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { RunnableConfig } from "@langchain/core/runnables";
-import { tool } from "@langchain/core/tools";
+import { tool, type StructuredToolInterface } from "@langchain/core/tools";
 
 import { INFO_PROMPT } from "./prompts.js";
 import { ensureConfiguration } from "./configuration.js";
@@ -18,7 +18,6 @@ import {
   isBaseMessage,
   ToolMessage,
 } from "@langchain/core/messages";
-import { z } from "zod";
 
 /**
  * Initialize tools within a function so that they have access to the current
@@ -27,7 +26,7 @@ import { z } from "zod";
 function initializeTools(
   state?: typeof StateAnnotation.State,
   config?: RunnableConfig,
-) {
+): StructuredToolInterface[] {
   /**
    * Search for general results.
    *
@@ -40,10 +39,19 @@ function initializeTools(
     maxResults: configuration.maxSearchResults,
   });
 
-  async function scrapeWebsite({ url }: { url: string }): Promise<string> {
+  async function scrapeWebsite(input: unknown): Promise<string> {
     /**
      * Scrape and summarize content from a given URL.
      */
+    if (
+      typeof input !== "object" ||
+      input === null ||
+      !("url" in input) ||
+      typeof input.url !== "string"
+    ) {
+      throw new Error("Expected a URL string");
+    }
+    const { url } = input;
     const response = await fetch(url);
     const content = await response.text();
     const truncatedContent = content.slice(0, 50000);
@@ -62,9 +70,18 @@ function initializeTools(
   const scraperTool = tool(scrapeWebsite, {
     name: "scrapeWebsite",
     description: "Scrape content from a given website URL",
-    schema: z.object({
-      url: z.string().url().describe("The URL of the website to scrape"),
-    }),
+    schema: {
+      type: "object",
+      properties: {
+        url: {
+          type: "string",
+          format: "uri",
+          description: "The URL of the website to scrape",
+        },
+      },
+      required: ["url"],
+      additionalProperties: false,
+    } as const,
   });
 
   return [searchTool, scraperTool];
