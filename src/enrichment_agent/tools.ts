@@ -49,7 +49,7 @@ function initializeTools(
       !("url" in input) ||
       typeof input.url !== "string"
     ) {
-      throw new Error("Expected a URL string");
+      throw new Error("Expected an object containing a URL string");
     }
     const { url } = input;
     const response = await fetch(url);
