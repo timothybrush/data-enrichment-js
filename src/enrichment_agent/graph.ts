@@ -71,7 +71,7 @@ async function callAgentModel(
 
   // Next, we'll call the model.
   const response: AIMessage = await model.invoke(messages);
-  const responseMessages = [response];
+  const responseMessages: BaseMessage[] = [response];
 
   // If the model has collected enough information to fill uot
   // the provided schema, great! It will call the "Info" tool
@@ -234,7 +234,7 @@ If you don't think it is good, you should be very specific about what could be i
 function routeAfterAgent(
   state: typeof StateAnnotation.State,
 ): "callAgentModel" | "reflect" | "tools" | "__end__" {
-  const lastMessage: AIMessage = state.messages[state.messages.length - 1];
+  const lastMessage = state.messages[state.messages.length - 1];
 
   // If for some reason the last message is not an AIMessage
   // (if you've modified this template and broken one of the assumptions)
@@ -242,9 +242,10 @@ function routeAfterAgent(
   if (lastMessage._getType() !== "ai") {
     return "callAgentModel";
   }
+  const aiMessage = lastMessage as AIMessage;
 
   // If the "Info" tool was called, then the model provided its extraction output. Reflect on the result
-  if (lastMessage.tool_calls && lastMessage.tool_calls[0]?.name === "Info") {
+  if (aiMessage.tool_calls && aiMessage.tool_calls[0]?.name === "Info") {
     return "reflect";
   }
 

@@ -5,7 +5,7 @@
  * These tools can be used for tasks such as web searching and scraping.
  * Users can edit and extend these tools as needed.
  */
-import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+import { TavilySearch } from "@langchain/tavily";
 import { RunnableConfig } from "@langchain/core/runnables";
 import { tool, type StructuredToolInterface } from "@langchain/core/tools";
 
@@ -26,6 +26,7 @@ import {
 function initializeTools(
   state?: typeof StateAnnotation.State,
   config?: RunnableConfig,
+  tavilyApiKey?: string,
 ): StructuredToolInterface[] {
   /**
    * Search for general results.
@@ -35,8 +36,9 @@ function initializeTools(
    * for answering questions about current events.
    */
   const configuration = ensureConfiguration(config);
-  const searchTool = new TavilySearchResults({
+  const searchTool = new TavilySearch({
     maxResults: configuration.maxSearchResults,
+    tavilyApiKey,
   });
 
   async function scrapeWebsite(input: unknown): Promise<string> {
@@ -142,4 +144,4 @@ export const toolNode = async (
 // No state or config required here since these are just bound to the chat model
 // and are only used to define schema.
 // The tool node above will actually call the functions.
-export const MODEL_TOOLS = initializeTools();
+export const MODEL_TOOLS = initializeTools(undefined, undefined, "not-used");
