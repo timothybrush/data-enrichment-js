@@ -8,6 +8,9 @@
   "private": true,
   "type": "module",
   "packageManager": "yarn@1.22.22",
+  "resolutions": {
+    "@babel/helpers": "^7.26.10"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
